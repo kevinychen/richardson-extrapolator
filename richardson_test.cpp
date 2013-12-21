@@ -11,22 +11,18 @@
 using namespace richardson;
 
 
-mpf_t ZERO;
-mpf_t ONE;
-mpf_t PI;
-
 /* Sample SequenceFuncs. */
 void reciprocal(index_t index, mpf_t result) {
     // Calculate 1/index
-    mpf_init_set_d(result, index);
-    mpf_div(result, ONE, result);
+    mpf_set_d(result, index);
+    mpf_ui_div(result, 1, result);
 }
 
 void onePlusReciprocal(index_t index, mpf_t result) {
     // Calculate 1 + 1/index
-    mpf_init_set_d(result, index);
-    mpf_div(result, ONE, result);
-    mpf_add(result, ONE, result);
+    mpf_set_d(result, index);
+    mpf_ui_div(result, 1, result);
+    mpf_add_ui(result, result, 1);
 }
 
 void approxPi(index_t index, mpf_t result) {
@@ -35,12 +31,16 @@ void approxPi(index_t index, mpf_t result) {
     // PI / 4 = 1 - 1/3 + 1/5 - 1/7 + ...
     mpf_set_d(result, 0);
     mpf_t subtotal;
-    mpf_init_set_d(subtotal, 0);
+    mpf_init(subtotal);
     for (index_t i = 0; i < index; i++) {
-        mpf_set_d(subtotal, (i % 2 == 0 ? 1 : -1) * (2 * i + 1));
-        mpf_div(subtotal, ONE, subtotal);
-        mpf_add(result, result, subtotal);
+        mpf_set_d(subtotal, 2 * i + 1);
+        mpf_ui_div(subtotal, 1, subtotal);
+        if (i % 2 == 0)
+            mpf_add(result, result, subtotal);
+        else
+            mpf_sub(result, result, subtotal);
     }
+    mpf_mul_ui(result, result, 4);
 }
 
 // Test Richardson extrapolating the function f with the specified number
@@ -72,15 +72,18 @@ void approxPi(index_t index, mpf_t result) {
 
 int main() {
     // Initialization code
+    mpf_t ZERO;
     mpf_init_set_d(ZERO, 0.0);
+    mpf_t ONE;
     mpf_init_set_d(ONE, 1.0);
+    mpf_t PI;
     mpf_init_set_d(PI, 3.1415926535897932384626433);
 
     int numFailures = 0;
 
     TEST(10, 1, reciprocal, ZERO, 10);
     TEST(10, 1, onePlusReciprocal, ONE, 10);
-    TEST(20, 1, approxPi, PI, 18);
+    TEST(20, 1, approxPi, PI, 15);
 
     if (numFailures) {
         printf("Found %d failures.\n", numFailures);

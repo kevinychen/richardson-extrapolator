@@ -12,16 +12,13 @@
  *
  * Example usage:
  *
- * mpf_t ONE;  // Define the constant ONE
- * mpf_init_set_d(ONE, 1.0);
- *
  * // Define SequenceFunc describing the sequence 1/n
  * void f(index_t index, mpf_t result) {
- *   mpf_init_set_d(result, index);
- *   mpf_div(result, ONE, result);
+ *   mpf_set_d(result, index);
+ *   mpf_ui_div(result, 1, result);
  * }
  *
- * const index_t num_samples = 10;
+ * const index_t num_samples = 10;  // must be < 32
  * const index_t start_index = 1;
  * mpf_t ans;
  * mpf_init(ans);
@@ -36,7 +33,7 @@
  *   f(start_index << i, samples + i);
  * extrapolate(num_samples, samples, ans);
  *
- * // do code with ans
+ * // do something with ans
  *
  * // Destroy the mpf_t used to store the answer
  * mpf_clear(ans);
