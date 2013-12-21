@@ -77,13 +77,13 @@ int main() {
     mpf_t ONE;
     mpf_init_set_d(ONE, 1.0);
     mpf_t PI;
-    mpf_init_set_d(PI, 3.1415926535897932384626433);
+    mpf_init_set_str(PI, "3.1415926535897932384626433", 10);
 
     int numFailures = 0;
 
     TEST(10, 1, reciprocal, ZERO, 10);
     TEST(10, 1, onePlusReciprocal, ONE, 10);
-    TEST(20, 1, approxPi, PI, 15);
+    TEST(20, 1, approxPi, PI, 18);
 
     if (numFailures) {
         printf("Found %d failures.\n", numFailures);
