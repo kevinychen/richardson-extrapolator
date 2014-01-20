@@ -31,7 +31,7 @@ void approxPi(index_t index, mpf_t result) {
     // PI / 4 = 1 - 1/3 + 1/5 - 1/7 + ...
     mpf_set_d(result, 0);
     mpf_t subtotal;
-    mpf_init(subtotal);
+    mpf_init2(subtotal, mpf_get_prec(result));
     for (index_t i = 0; i < index; i++) {
         mpf_set_d(subtotal, 2 * i + 1);
         mpf_ui_div(subtotal, 1, subtotal);
@@ -44,27 +44,27 @@ void approxPi(index_t index, mpf_t result) {
 }
 
 // Test Richardson extrapolating the function f with the specified number
-// of samples and the specified start index, and ensure that it matches
-// the given expected value to num_precision decimal places.
-#define TEST(num_samples, start_index, f, expected, num_precision) \
+// of samples at the specified precision and the specified start index, and
+// ensure that it matches the given expected value to within 2^-diff_precision.
+#define TEST(num_samples, start_index, f, expected, precision, diff_precision) \
 { \
     mpf_t error; \
-    mpf_init_set_d(error, 0.1); \
-    mpf_pow_ui(error, error, num_precision); \
+    mpf_init_set_d(error, 0.5); \
+    mpf_pow_ui(error, error, diff_precision); \
  \
     mpf_t ans; \
-    mpf_init(ans); \
+    mpf_init2(ans, precision); \
     extrapolate(num_samples, start_index, &f, ans); \
  \
     mpf_t diff; \
-    mpf_init(diff); \
+    mpf_init2(diff, precision); \
     mpf_sub(diff, ans, expected); \
     mpf_abs(diff, diff); \
     if (mpf_cmp(diff, error) > 0) { \
         printf("%s test failed. Expected ", #f); \
-        mpf_out_str(NULL, 10, num_precision, expected); \
+        mpf_out_str(NULL, 10, precision, expected); \
         printf(", but got "); \
-        mpf_out_str(NULL, 10, num_precision, ans); \
+        mpf_out_str(NULL, 10, precision, ans); \
         printf("\n"); \
         numFailures++; \
     } \
@@ -77,13 +77,14 @@ int main() {
     mpf_t ONE;
     mpf_init_set_d(ONE, 1.0);
     mpf_t PI;
-    mpf_init_set_str(PI, "3.1415926535897932384626433", 10);
+    mpf_init2(PI, 128);
+    mpf_set_str(PI, "3.1415926535897932384626433832795028841971", 10);
 
     int numFailures = 0;
 
-    TEST(10, 1, reciprocal, ZERO, 10);
-    TEST(10, 1, onePlusReciprocal, ONE, 10);
-    TEST(20, 1, approxPi, PI, 18);
+    TEST(10, 1, reciprocal, ZERO, 64, 10);
+    TEST(10, 1, onePlusReciprocal, ONE, 64, 10);
+    TEST(16, 1, approxPi, PI, 128, 80);
 
     if (numFailures) {
         printf("Found %d failures.\n", numFailures);
