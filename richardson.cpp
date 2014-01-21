@@ -1,5 +1,5 @@
 /*
- * richardson.c
+ * richardson.cpp
  *
  * Library functions for Richardson Extrapolation.
  */
