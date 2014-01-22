@@ -29,13 +29,17 @@
  * // Alternatively, we can compute only the required samples, then directly
  * // feed them into the three argument variant of extrapolate().
  * mpf_t samples[num_samples];
- * for (index_t i = 0; i < num_samples; i++)
- *   f(start_index << i, samples + i);
+ * for (index_t index = 0; index < num_samples; index++) {
+ *   mpf_init(samples[index]);
+ *   f(start_index << index, samples[index]);
+ * }
  * extrapolate(num_samples, samples, ans);
  *
  * // do something with ans
  *
- * // Destroy the mpf_t used to store the answer
+ * // Destroy the mpf_t used to store the samples and answer
+ * for (index_t index = 0; index < num_samples; index++)
+ *   mpf_clear(samples[index]);
  * mpf_clear(ans);
  */
 
